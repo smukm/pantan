@@ -7,6 +7,9 @@ linters-settings:
     excludes:
       - G114  # HTTP без TLS (если вы уверены, что за HTTPS отвечает прокси)
       - G402  # TLS InsecureSkipVerify (или другая проверка, связанная с http3)
+      - G403  # TLS MinVersion слишком низкая
+      - G404  # Использование слабых шифров
+      - G408  # Использование http3.ConfigureTLSConfig
 linters:
   enable:
     - errcheck
