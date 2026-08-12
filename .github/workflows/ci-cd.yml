@@ -39,10 +39,10 @@ jobs:
           echo "✅ All files formatted"
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          args: --timeout=5m
+          version: v1.64.8
+          args: --timeout=5m --out-format=colored-line-number
           # Если используете конфиг .golangci.yml, он будет загружен автоматически
 
       - name: Run tests with race detector
