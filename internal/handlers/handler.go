@@ -1,0 +1,28 @@
+package handlers
+
+import (
+	"pantan/config"
+
+	gin "github.com/gin-gonic/gin"
+)
+
+type Handler struct {
+	cfg *config.Config
+}
+
+func NewHandler(cfg *config.Config) *Handler {
+	return &Handler{
+		cfg: cfg,
+	}
+}
+
+func (h *Handler) InitRoutes() *gin.Engine {
+
+	router := gin.New()
+
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
+	return router
+}

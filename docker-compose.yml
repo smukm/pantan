@@ -1,0 +1,11 @@
+services:
+  pantan:
+    container_name: pantan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PT_PORT: ${PT_PORT} # порт сервиса
+    ports:
+      - "${PT_PORT}:${PT_PORT}"
+    restart: always
