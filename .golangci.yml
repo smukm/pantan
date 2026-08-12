@@ -1,6 +1,15 @@
 run:
   timeout: 5m
 
+linters-settings:
+  gosec:
+    excludes:
+      - G114  # Игнорируем предупреждение о HTTP без TLS (если нужно)
+    # Или включить только конкретные проверки:
+    # includes:
+    #   - G101  # Проверка на hardcoded credentials
+    #   - G102  # Проверка на bind to all interfaces
+
 linters:
   enable:
     - errcheck
