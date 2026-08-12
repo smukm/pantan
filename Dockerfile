@@ -1,5 +1,6 @@
 # Stage 1: Modules caching
 FROM golang:1.23 as modules
+WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
