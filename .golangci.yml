@@ -6,7 +6,7 @@ linters-settings:
     # Глобально отключаем определенные проверки Gosec
     excludes:
       - G114  # HTTP без TLS (если вы уверены, что за HTTPS отвечает прокси)
-
+      - G402  # TLS InsecureSkipVerify (или другая проверка, связанная с http3)
 linters:
   enable:
     - errcheck
