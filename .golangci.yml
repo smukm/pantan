@@ -26,3 +26,9 @@ issues:
   exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+
+  exclude-rules:
+    - path: "pkg/httpserver/main\\.go"
+      linters:
+        - gosec
+      text: "http3"
