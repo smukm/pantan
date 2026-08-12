@@ -8,7 +8,7 @@ on:
 
 env:
   # Выберите ваш регистр: ghcr.io (GitHub) или docker.io (Docker Hub)
-  REGISTRY: docker.io
+  REGISTRY: ghcr.io
   # Для Docker Hub: REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository }}
   # Для Docker Hub: IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/pantan
@@ -148,7 +148,7 @@ jobs:
           port: ${{ secrets.PORT || 22 }}
           script: |
             # Пример команды для обновления контейнера на сервере
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker pull ghcr.io/${{ github.repository }}:latest
             docker stop pantan-app || true
             docker rm pantan-app || true
-            docker run -d --name pantan-app -p 8080:8080 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker run -d --name pantan-app -p 8033:8033 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
