@@ -5,12 +5,10 @@ on:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master, develop ]
-  schedule:
-    - cron: '0 2 * * *'  # Ежедневный запуск в 2:00 ночи (опционально)
 
 env:
   # Выберите ваш регистр: ghcr.io (GitHub) или docker.io (Docker Hub)
-  REGISTRY: ghcr.io
+  REGISTRY: docker.io
   # Для Docker Hub: REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository }}
   # Для Docker Hub: IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/pantan
@@ -28,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.25'
           cache: true
 
       - name: Check formatting
