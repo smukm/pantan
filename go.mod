@@ -1,6 +1,6 @@
 module pantan
 
-go 1.25.3
+go 1.25.0
 
 require (
 	github.com/getsentry/sentry-go v0.48.0
