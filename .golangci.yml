@@ -3,12 +3,9 @@ run:
 
 linters-settings:
   gosec:
+    # Глобально отключаем определенные проверки Gosec
     excludes:
-      - G114  # Игнорируем предупреждение о HTTP без TLS (если нужно)
-    # Или включить только конкретные проверки:
-    # includes:
-    #   - G101  # Проверка на hardcoded credentials
-    #   - G102  # Проверка на bind to all interfaces
+      - G114  # HTTP без TLS (если вы уверены, что за HTTPS отвечает прокси)
 
 linters:
   enable:
