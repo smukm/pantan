@@ -26,7 +26,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: '1.25'
           cache: true
 
       - name: Check formatting
@@ -38,13 +38,15 @@ jobs:
           fi
           echo "✅ All files formatted"
 
+      - name: Install golangci-lint
+        run: |
+          # Устанавливаем последнюю стабильную версию
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
+
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: v1.64.8
-          args: --timeout=5m --out-format=colored-line-number
-          go-version: '1.25'
-          # Если используете конфиг .golangci.yml, он будет загружен автоматически
+        run: |
+          # Запускаем с явным указанием версии Go
+          golangci-lint run --timeout=5m --out-format=colored-line-number --go=1.25
 
       - name: Run tests with race detector
         run: go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
