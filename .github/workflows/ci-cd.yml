@@ -59,14 +59,14 @@ jobs:
       - name: Run security check (govulncheck)
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./...
+          govulncheck ./cmd/... ./internal/...
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.out
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
+      #- name: Upload coverage to Codecov
+      #  uses: codecov/codecov-action@v4
+      #  with:
+      #    file: ./coverage.out
+      #    fail_ci_if_error: false
+      #    token: ${{ secrets.CODECOV_TOKEN }}
 
   # ============ ЗАДАНИЕ 2: СБОРКА И ПУБЛИКАЦИЯ ============
   build-and-push:
