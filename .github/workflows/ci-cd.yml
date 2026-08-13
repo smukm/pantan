@@ -382,7 +382,7 @@ jobs:
           fi
 
       - name: Send to Telegram
-        if: secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        if: ${{ secrets.TELEGRAM_BOT_TOKEN }} != '' && ${{ secrets.TELEGRAM_CHAT_ID }} != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
