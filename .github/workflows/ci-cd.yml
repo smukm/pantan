@@ -155,6 +155,8 @@ jobs:
           script: |
             # Перезапуск Docker для сброса iptables
             systemctl restart docker
+            sleep 2
+            
             # Пример команды для обновления контейнера на сервере
             docker pull ghcr.io/${{ github.repository }}:latest
             docker stop pantan-app || true
