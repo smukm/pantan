@@ -17,6 +17,8 @@ env:
   # Для Docker Hub: REGISTRY: docker.io
   IMAGE_NAME: smukm/pantan
   # Для Docker Hub: IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/pantan
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
   # ============ ЗАДАНИЕ 1: КАЧЕСТВО КОДА ============
@@ -382,7 +384,7 @@ jobs:
           fi
 
       - name: Send to Telegram
-        if: ${{ secrets.TELEGRAM_BOT_TOKEN }} != '' && ${{ secrets.TELEGRAM_CHAT_ID }} != ''
+        if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
