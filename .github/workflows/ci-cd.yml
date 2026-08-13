@@ -389,26 +389,27 @@ jobs:
           script: |
             const notes = `${{ needs.create-release.outputs.notes || 'No release notes' }}`;
             const modelUsed = `${{ needs.create-release.outputs.model_used || 'N/A' }}`;
-            
+            const sha = `${{ github.sha }}`.slice(0, 7);
+
             const message = `
             🚀 **Deployment Successful!**
-            
+
             📦 Repository: ${{ github.repository }}
             🔖 Branch: ${{ github.ref_name }}
             📝 Commit: ${{ github.sha }}
             👤 Author: ${{ github.actor }}
             🤖 Model: ${modelUsed}
-            
+
             ---
-            
+
             ${notes}
             `;
-            
+
             try {
               await github.rest.discussions.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `🚀 Deployment ${new Date().toISOString().split('T')[0]} - ${'${{ github.sha }}'.slice(0, 7)}`,
+                title: `🚀 Deployment ${new Date().toISOString().split('T')[0]} - ${sha}`,
                 body: message,
                 category_id: 'announcements',
               });
