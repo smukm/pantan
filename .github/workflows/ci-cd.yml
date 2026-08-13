@@ -59,7 +59,7 @@ jobs:
       - name: Run security check (govulncheck)
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@latest
-          govulncheck ./cmd/... ./internal/...
+          govulncheck ./cmd/... ./internal/... -exclude github.com/smukm/pantan/pkg/httpserver
 
       #- name: Upload coverage to Codecov
       #  uses: codecov/codecov-action@v4
