@@ -4,6 +4,7 @@ import (
 	"pantan/config"
 
 	gin "github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Handler struct {
@@ -23,6 +24,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	return router
 }
