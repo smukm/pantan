@@ -12,11 +12,8 @@ permissions:
   id-token: write
 
 env:
-  # Куда пушить образы (ghcr или docker.io)
   REGISTRY: ghcr.io
-  # Для Docker Hub: REGISTRY: docker.io
   IMAGE_NAME: smukm/pantan
-  # Для Docker Hub: IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/pantan
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
@@ -25,10 +22,12 @@ jobs:
   quality:
     name: Code Quality Checks
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -46,14 +45,10 @@ jobs:
           echo "✅ All files formatted"
 
       - name: Install golangci-lint
-        run: |
-          # Устанавливаем последнюю стабильную версию
-          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
 
       - name: Run golangci-lint
-        run: |
-          # Запускаем с явным указанием версии Go
-          golangci-lint run --timeout=5m --out-format=colored-line-number --go=1.25
+        run: golangci-lint run --timeout=5m --out-format=colored-line-number --go=1.25
 
       - name: Run tests with race detector
         run: go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
@@ -64,46 +59,29 @@ jobs:
           govulncheck -show verbose ./cmd/... ./internal/... || echo "⚠️ Vulnerabilities found (non-blocking)"
         continue-on-error: true
 
-      #- name: Upload coverage to Codecov
-      #  uses: codecov/codecov-action@v4
-      #  with:
-      #    file: ./coverage.out
-      #    fail_ci_if_error: false
-      #    token: ${{ secrets.CODECOV_TOKEN }}
-
   # ============ ЗАДАНИЕ 2: СБОРКА И ПУБЛИКАЦИЯ ============
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
     needs: quality
-    # Запускаем только для main/master при пуше
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up QEMU (для мультиархитектурности)
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Вход в GHCR
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Вход в Docker Hub
-      #- name: Log in to Docker Hub
-      #  if: env.REGISTRY == 'docker.io'
-      #  uses: docker/login-action@v3
-      #  with:
-      #    username: ${{ secrets.DOCKER_USERNAME }}
-      #    password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Extract metadata
         id: meta
@@ -125,9 +103,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: . # (корень репозитория) В этой папке должен находиться Dockerfile
+          context: .
           push: true
-          platforms: linux/amd64,linux/arm64  # Мультиархитектурная сборка
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -145,34 +123,32 @@ jobs:
     environment: production
     concurrency: production
 
+    outputs:
+      deploy_status: ${{ job.status }}
+
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          #key: ${{ secrets.SSH_KEY }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
-            # Перезапуск Docker для сброса iptables
             sudo systemctl restart docker
             sleep 2
             
-            # Загрузка нового образа
             echo "📦 Pulling latest image..."
             docker pull ghcr.io/${{ github.repository }}:latest
             
-            # Остановка и удаление старого контейнера
             echo "🛑 Stopping old container..."
             docker stop pantan-app || true
             docker rm pantan-app || true
             
-            # Запуск нового контейнера
             echo "🚀 Starting new container..."
             docker run -d --name pantan-app -p 8033:8033 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-    # ============ ЗАДАНИЕ 4: СОЗДАНИЕ РЕЛИЗА С OPENROUTER ============
+  # ============ ЗАДАНИЕ 4: СОЗДАНИЕ РЕЛИЗА С OPENROUTER ============
   create-release:
     name: Create Release with OpenRouter
     runs-on: ubuntu-latest
@@ -182,6 +158,11 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+
+    outputs:
+      notes: ${{ steps.release_notes.outputs.notes }}
+      model_used: ${{ steps.release_notes.outputs.model_used }}
+      release_created: ${{ steps.create_release.outcome }}
 
     steps:
       - name: Checkout code
@@ -237,7 +218,6 @@ jobs:
             const repoName = `${{ steps.repo_info.outputs.repo_name }}`;
             const repoDescription = `${{ steps.repo_info.outputs.repo_description }}`;
             
-            // Проверяем, есть ли API ключ
             if (!process.env.OPENROUTER_API_KEY) {
               core.warning('OpenRouter API key not found. Using fallback release notes.');
               const fallbackNotes = generateFallbackNotes(commits, changedFiles);
@@ -246,7 +226,6 @@ jobs:
               return;
             }
             
-            // Подготовка промпта для OpenRouter
             const prompt = `
             Generate professional release notes for ${repoName} project.
             
@@ -281,7 +260,7 @@ jobs:
                   'X-Title': 'Release Notes Generator'
                 },
                 body: JSON.stringify({
-                  model: 'nvidia/nemotron-3-ultra-550b-a55b:free', // или другая модель
+                  model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
                   messages: [
                     {
                       role: 'system',
@@ -345,6 +324,7 @@ jobs:
           echo "Generated with model: ${{ steps.release_notes.outputs.model_used }}"
 
       - name: Create Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           name: Release ${{ github.sha }}
@@ -408,13 +388,28 @@ jobs:
         with:
           script: |
             const notes = `${{ needs.create-release.outputs.notes || 'No release notes' }}`;
+            const modelUsed = `${{ needs.create-release.outputs.model_used || 'N/A' }}`;
+            
+            const message = `
+            🚀 **Deployment Successful!**
+            
+            📦 Repository: ${{ github.repository }}
+            🔖 Branch: ${{ github.ref_name }}
+            📝 Commit: ${{ github.sha }}
+            👤 Author: ${{ github.actor }}
+            🤖 Model: ${modelUsed}
+            
+            ---
+            
+            ${notes}
+            `;
             
             try {
               await github.rest.discussions.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `🚀 Deployment ${new Date().toISOString().split('T')[0]}`,
-                body: notes,
+                title: `🚀 Deployment ${new Date().toISOString().split('T')[0]} - ${'${{ github.sha }}'.slice(0, 7)}`,
+                body: message,
                 category_id: 'announcements',
               });
               console.log('✅ Discussion created');
