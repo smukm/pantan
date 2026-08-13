@@ -154,7 +154,7 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             # Перезапуск Docker для сброса iptables
-            systemctl restart docker
+            sudo systemctl restart docker
             sleep 2
             
             # Пример команды для обновления контейнера на сервере
