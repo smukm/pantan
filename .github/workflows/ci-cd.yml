@@ -154,7 +154,7 @@ jobs:
           port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             # Перезапуск Docker для сброса iptables
-            sudo systemctl restart docker
+            systemctl restart docker
             # Пример команды для обновления контейнера на сервере
             docker pull ghcr.io/${{ github.repository }}:latest
             docker stop pantan-app || true
