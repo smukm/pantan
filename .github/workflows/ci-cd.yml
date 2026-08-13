@@ -140,8 +140,8 @@ jobs:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     # Раскомментируйте, если у вас есть сервер для деплоя
-    # environment: production
-    # concurrency: production
+    environment: production
+    concurrency: production
 
     steps:
       - name: Deploy via SSH
@@ -149,8 +149,9 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT || 22 }}
+          #key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             # Пример команды для обновления контейнера на сервере
             docker pull ghcr.io/${{ github.repository }}:latest
