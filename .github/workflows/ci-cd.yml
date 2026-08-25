@@ -137,31 +137,10 @@ jobs:
           script: |
             sudo systemctl restart docker
             sleep 2
-            
-            mkdir -p /var/www/www-root/data/stats
+            # в эту директорию нужно закинуть папку Docker
+            # и файлы .env и docker-compose.prod.yml
             cd /var/www/www-root/data/stats
             
-            # Копируем docker-compose файл и конфиги
-            cat > docker-compose.prod.yml << 'EOF'
-            $(cat docker-compose.prod.yml | base64)
-            EOF
-            
-            # Создаем .env файл
-            cat > .env << EOF
-            PT_PORT=8033
-            PT_ENV=production
-            PT_LOG_LEVEL=1
-            PT_LOG_FORMAT=json
-            PT_LOG_TARGET=local
-            GRAFANA_USER=admin
-            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-            REGISTRY=ghcr.io
-            IMAGE_NAME=${{ github.repository }}
-            EOF
-            
-            # Создаем директории для конфигов
-            mkdir -p Docker/prometheus Docker/grafana/provisioning
-          
             # Логинимся в GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
