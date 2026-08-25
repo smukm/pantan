@@ -138,15 +138,56 @@ jobs:
             sudo systemctl restart docker
             sleep 2
             
+            mkdir -p /var/www/www-root/data/stats
+            cd /var/www/www-root/data/stats
+            
+            # Копируем docker-compose файл и конфиги
+            cat > docker-compose.prod.yml << 'EOF'
+            $(cat docker-compose.prod.yml | base64)
+            EOF
+            
+            # Создаем .env файл
+            cat > .env << EOF
+            PT_PORT=8033
+            PT_ENV=production
+            PT_LOG_LEVEL=1
+            PT_LOG_FORMAT=json
+            PT_LOG_TARGET=local
+            GRAFANA_USER=admin
+            GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+            REGISTRY=ghcr.io
+            IMAGE_NAME=${{ github.repository }}
+            EOF
+            
+            # Создаем директории для конфигов
+            mkdir -p Docker/prometheus Docker/grafana/provisioning
+          
+            # Логинимся в GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
             echo "📦 Pulling latest image..."
-            docker pull ghcr.io/${{ github.repository }}:latest
+            #docker pull ghcr.io/${{ github.repository }}:latest
+            docker compose -f docker-compose.prod.yml pull
             
             echo "🛑 Stopping old container..."
-            docker stop pantan-app || true
-            docker rm pantan-app || true
+            #docker stop pantan-app || true
+            #docker rm pantan-app || true
+            docker compose -f docker-compose.prod.yml down || true
             
-            echo "🚀 Starting new container..."
-            docker run -d --name pantan-app -p 8033:8033 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            # Запускаем все сервисы
+            echo "🚀 Starting all services..."
+            docker compose -f docker-compose.prod.yml up -d
+          
+            #echo "🚀 Starting new container..."
+            #docker run -d --name pantan-app -p 8033:8033 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            
+            # Проверяем статус
+            echo "✅ Checking service status..."
+            sleep 10
+            docker compose -f docker-compose.prod.yml ps
+          
+            # Очищаем неиспользуемые образы
+            docker image prune -f
 
   # ============ ЗАДАНИЕ 4: СОЗДАНИЕ РЕЛИЗА С OPENROUTER ============
   create-release:
