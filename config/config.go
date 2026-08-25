@@ -10,6 +10,7 @@ const Version = "1.0.0"
 
 type Config struct {
 	Port string `required:"true" default:"8033"`
+	Env  string `required:"true" default:"dev"`
 
 	LogLevel  int8   `default:"1"`
 	LogFormat string `default:"json"`

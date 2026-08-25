@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/getsentry/sentry-go v0.48.0
 	github.com/gin-gonic/gin v1.12.0
+	github.com/gorilla/mux v1.8.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/rs/zerolog v1.35.1

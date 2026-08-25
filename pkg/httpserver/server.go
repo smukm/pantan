@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -14,13 +16,14 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-func (s *Server) Run(port string, handler http.Handler) error {
+func (s *Server) Run(port string, router *mux.Router) error {
 	s.httpServer = &http.Server{
 		Addr:           ":" + port,
-		Handler:        handler,
+		Handler:        router,
 		MaxHeaderBytes: 1 << 20, // 1Mb
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   30 * time.Second,
+		IdleTimeout:    60 * time.Second,
 	}
 	return s.httpServer.ListenAndServe()
 }
