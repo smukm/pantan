@@ -31,6 +31,7 @@ services:
     image: grafana/grafana
     depends_on:
       - prometheus
+      - loki
     volumes:
       - grafana-data:/var/lib/grafana
       - ./Docker/grafana/provisioning:/etc/grafana/provisioning:ro
@@ -42,7 +43,33 @@ services:
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
       - TZ=Europe/Moscow
     restart: unless-stopped
-    
+
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    volumes:
+      - ./Docker/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    command: --config.file=/etc/loki/loki-config.yml
+    environment:
+      TZ: "Europe/Moscow"
+    restart: unless-stopped
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    volumes:
+      - ./Docker/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      # Монтируем логи хоста
+      - /home/vv68/www/brend-logo-droplet/brend-logo2.ru:/logs/brend-logo:ro
+    command: --config.file=/etc/promtail/promtail-config.yml
+    environment:
+      TZ: "Europe/Moscow"
+    restart: unless-stopped
+
 volumes:
   grafana-data:
   prometheus-data:
+  loki-data:

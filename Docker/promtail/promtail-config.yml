@@ -1,0 +1,51 @@
+# ./Docker/promtail/promtail-config.yml
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Сбор системных логов хоста
+  #- job_name: system
+  #  static_configs:
+  #    - targets:
+  #        - localhost
+  #      labels:
+  #        job: varlogs
+  #        __path__: /var/log/*log
+
+  # Сбор логов всех Docker контейнеров
+  #- job_name: docker
+  #  static_configs:
+  #   - targets:
+  #        - localhost
+  #      labels:
+  #        job: docker
+  #        __path__: /var/lib/docker/containers/*/*-json.log
+  #  pipeline_stages:
+  #    - docker: {}
+
+  - job_name: brend-logo-docker
+    static_configs:
+        - targets:
+          - localhost
+          labels:
+            job: brend-logo
+            source: local
+            # ИСПРАВЛЕНО: путь внутри контейнера promtail после монтирования
+            __path__: /logs/brend-logo/**/runtime/logs/app-err.log
+    pipeline_stages:
+      # Парсим строку - ищем паттерн [таймстамп][IP][...][level][category] в ЛЮБОМ месте строки
+      - regex:
+          expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]\[(?P<user>[^\]]*)\]\[(?P<request_id>[^\]]+)\]\[(?P<level>[^\]]+)\]\[(?P<category>[^\]]+)\] (?P<message>.+)'
+
+      # Извлекаем метки
+      - labels:
+          level:
+          category:
+          ip:
