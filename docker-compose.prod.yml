@@ -16,7 +16,7 @@ services:
     container_name: prometheus
     image: prom/prometheus:latest
     volumes:
-      - ./Docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./Docker/prometheus/prometheus-prod.yml:/etc/prometheus/prometheus.yml:ro
       - ./Docker/prometheus/web.yml:/etc/prometheus/web.yml:ro   # Монтируем файл с паролем
       - prometheus-data:/prometheus
     ports:
@@ -55,8 +55,8 @@ services:
     volumes:
       - ./Docker/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki-data:/loki
-    ports:
-      - "3100:3100"
+    #ports:
+    #  - "3100:3100"
     command: --config.file=/etc/loki/loki-config.yml
     environment:
       TZ: "Europe/Moscow"
@@ -73,6 +73,26 @@ services:
     environment:
       TZ: "Europe/Moscow"
     restart: unless-stopped
+
+  node-exporter:
+    container_name: node-exporter
+    image: prom/node-exporter:latest
+    #network_mode: host
+    #pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(proc|sys|dev|run|boot|host|etc)($$|/)'
+      - '--collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs|tmpfs)$$'
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+
 volumes:
   grafana-data:
   prometheus-data:

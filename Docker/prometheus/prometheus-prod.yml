@@ -15,12 +15,14 @@ scrape_configs:
 
   - job_name: 'brend-logo'
     scrape_interval: 15s
+    scheme: https                                    # ИСПОЛЬЗОВАТЬ HTTPS
+    tls_config:
+      insecure_skip_verify: true                     # Пропускать проверку сертификата
     static_configs:
-      #- targets: [ 'localhost:80' ]  # ваш хост
-      - targets: ['host.docker.internal:80']
+      - targets: ['brend-logo.ru:443']
     metrics_path: /metrics
     params:
-      format: [ prometheus ]
+      format: [prometheus]
 
   # Мониторинг системных метрик хоста
   - job_name: 'node-exporter'
