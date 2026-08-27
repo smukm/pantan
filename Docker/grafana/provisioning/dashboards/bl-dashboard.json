@@ -67,7 +67,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(http_request_duration_seconds_sum{job=\"brend-logo\"}) by (path) / sum(http_request_duration_seconds_count{job=\"brend-logo\"}) by (path)",
+          "expr": "rate(http_request_duration_seconds_sum{job=\"brend-logo\"}[$__rate_interval]) / rate(http_request_duration_seconds_count{job=\"brend-logo\"}[$__rate_interval])",
           "interval": "",
           "legendFormat": "{{path}}",
           "refId": "A"
