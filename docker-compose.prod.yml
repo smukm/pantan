@@ -17,12 +17,19 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./Docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./Docker/prometheus/web.yml:/etc/prometheus/web.yml:ro   # Монтируем файл с паролем
       - prometheus-data:/prometheus
     ports:
       - 9090:9090
     restart: unless-stopped
     environment:
       TZ: "Europe/Moscow"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.config.file=/etc/prometheus/web.yml'   # Активируем аутентификацию
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--web.listen-address=0.0.0.0:9090'
 
   grafana:
     container_name: grafana
@@ -37,7 +44,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-password}
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      #- GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
       - TZ=Europe/Moscow
     restart: unless-stopped
 

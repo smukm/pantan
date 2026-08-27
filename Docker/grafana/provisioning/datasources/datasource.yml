@@ -7,3 +7,10 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: true
+    basicAuth: true
+    basicAuthUser: admin
+    secureJsonData:
+      basicAuthPassword: npvgpnkd
+    jsonData:
+      tlsSkipVerify: true
+      timeInterval: "15s"
