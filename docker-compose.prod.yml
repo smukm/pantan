@@ -1,3 +1,11 @@
+# Глобальная конфигурация логирования (не создает отдельный сервис)
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"    # Максимальный размер одного лог-файла
+    max-file: "5"      # Хранить максимум 5 файлов (итого ~50MB на контейнер)
+    compress: "true"   # Сжимать старые лог-файлы (экономит место)
+
 services:
   pantan:
     container_name: pantan
@@ -15,6 +23,9 @@ services:
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "brend-logo.ru:95.163.243.241"
     volumes:
       - ./Docker/prometheus/prometheus-prod.yml:/etc/prometheus/prometheus.yml:ro
       - ./Docker/prometheus/web.yml:/etc/prometheus/web.yml:ro   # Монтируем файл с паролем
@@ -24,6 +35,7 @@ services:
     restart: unless-stopped
     environment:
       TZ: "Europe/Moscow"
+    logging: *default-logging
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.config.file=/etc/prometheus/web.yml'   # Активируем аутентификацию

@@ -1,3 +1,11 @@
+# Глобальная конфигурация логирования (не создает отдельный сервис)
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"    # Максимальный размер одного лог-файла
+    max-file: "5"      # Хранить максимум 5 файлов (итого ~50MB на контейнер)
+    compress: "true"   # Сжимать старые лог-файлы (экономит место)
+
 services:
   pantan:
     container_name: pantan

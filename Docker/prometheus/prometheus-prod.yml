@@ -9,12 +9,13 @@ scrape_configs:
     metrics_path: /metrics
     scrape_interval: 5s
 
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
+  #- job_name: 'prometheus'
+  #  static_configs:
+  #    - targets: ['localhost:9090']
 
   - job_name: 'brend-logo'
-    scrape_interval: 15s
+    scrape_interval: 60s
+    scrape_timeout: 15s
     scheme: https                                    # ИСПОЛЬЗОВАТЬ HTTPS
     tls_config:
       insecure_skip_verify: true                     # Пропускать проверку сертификата
