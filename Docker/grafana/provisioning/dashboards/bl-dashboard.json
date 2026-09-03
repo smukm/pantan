@@ -67,7 +67,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(http_request_duration_seconds_sum{job=\"brend-logo\"}[$__rate_interval]) / rate(http_request_duration_seconds_count{job=\"brend-logo\"}[$__rate_interval])",
+          "expr": "sum by (path) (rate(http_request_duration_seconds_sum{job=\"brend-logo\"}[$__range])) / sum by (path) (rate(http_request_duration_seconds_count{job=\"brend-logo\"}[$__range]))",
           "interval": "",
           "legendFormat": "{{path}}",
           "refId": "A"
@@ -353,7 +353,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by (path) (rate(http_requests_total{job=\"brend-logo\"}[$__rate_interval]))",
+          "expr": "sum by (path) (rate(http_requests_total{job=\"brend-logo\"}[$__range]))",
           "interval": "",
           "legendFormat": "{{path}}",
           "refId": "A"
@@ -679,13 +679,13 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{job=\"brend-logo\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{job=\"brend-logo\"}[$__range])))",
           "interval": "",
           "legendFormat": "{{path}} 95th percentile",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, sum by (le, path) (rate(http_request_duration_seconds_bucket{job=\"brend-logo\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.99, sum by (le, path) (rate(http_request_duration_seconds_bucket{job=\"brend-logo\"}[$__range])))",
           "interval": "",
           "legendFormat": "{{path}} 99th percentile",
           "refId": "B"
