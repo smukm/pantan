@@ -80,6 +80,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 - Логирование Docker: Глобально настроен json-file драйвер с ротацией (макс. 5 файлов по 5MB, сжатие включено), что предотвращает переполнение диска логами контейнеров.
 
 ### Структура конфигураций на сервере
+```text
 /var/www/www-root/data/stats/
 ├── docker-compose.prod.yml   # Оркестрация сервисов
 ├── .env                      # Переменные окружения
@@ -93,3 +94,4 @@ docker compose -f docker-compose.prod.yml up -d --build
 │   └── loki-config.yml
 └── promtail/
 └── promtail-config.yml
+```
